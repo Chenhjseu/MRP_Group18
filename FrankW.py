@@ -6,8 +6,8 @@ import random
 # block decent - for Frank wolfre
 def FW_BD(x, y, point = None, max_iter=200, tolerance=1e-100, partition = 3):
     if point is None:
-        #point = np.random.randn(x.shape[1], 1) * 1000
-        point = np.array([233., 1924., 182., -1191., -575., 643., 205., 385., 1028., 199.]).T
+        point = np.random.randn(x.shape[1], 1) * 1
+        #point = np.array([233., 1924., 182., -1191., -575., 643., 205., 385., 1028., 199.]).T
     point = point.reshape(x.shape[1], 1)
     blocks_index = get_blocks(x,partition = partition)
     #blocks_index = [(0, 1), (1, 3), (3, 10)]
@@ -27,12 +27,30 @@ def FW_BD(x, y, point = None, max_iter=200, tolerance=1e-100, partition = 3):
     return point, gaps, loses
 
 
+# def FWBD_withsoftmax(x, y, point = None, max_iter=200, tolerance=1e-100, partition = 3):
+#     if point is None:
+#         point = np.random.randn(x.shape[1], 1) * 1
+#         #point = np.array([233., 1924., 182., -1191., -575., 643., 205., 385., 1028., 199.]).T
+#     point = point.reshape(x.shape[1], 1)
+#     blocks_index = get_blocks(x,partition = partition)
+#     #blocks_index = [(0, 1), (1, 3), (3, 10)]
+#     gaps = []
+#     loses = []
+#     for t in range(max_iter):
+#         gap, vk = FWSC_state(x, y, point)
+#         gaps.append(gap)
+#         loses.append(loss_function(x, y, point))
+#         if abs(gap) < tolerance:
+#             break
+#
+#     return point, gaps, loses
+
 #adaptive FrankWofle for self - concordant
 def FrankWolfewithSC(x, y, point = None, max_iter=200, tolerance=1e-100):
     M = 2  ##to be determined
     if point is None:
-        # point = np.random.randn(x.shape[1], 1) * 1000
-        point = np.array([[233., 1924., 182., -1191., -575., 643., 205., 385., 1028., 199.]]).T
+        point = np.random.randn(x.shape[1], 1) * 1
+        #point = np.array([[233., 1924., 182., -1191., -575., 643., 205., 385., 1028., 199.]]).T
     gaps = []
     loses = []
     for t in range(max_iter):
@@ -64,18 +82,22 @@ def split_blocks(partition, shape):
 def FWSC_state(x,y, theta):
     gradient = gradient_entropyloss(theta, x, y)
 
-    s = linear_oracle(gradient,theta)
+    s = linear_oracle(gradient)
     GAP = np.dot(gradient.T, theta - s)
     if GAP< 0:
         print("error GAP")
     return np.squeeze(GAP), theta - s
 
 
-def linear_oracle(grad, theta):
-    s_dot = np.dot(grad, theta.T)
-    argmin = np.argmin(np.linalg.norm(s_dot, axis=1, keepdims=True))
-    s = np.array(s_dot[argmin])
-    return s.reshape(grad.shape)
+def linear_oracle(grad, r = 1):
+    s = np.zeros(grad.shape)
+    i_max = np.argmax(np.abs(grad))
+    s[i_max] = -r * np.sign(grad[i_max]) # 1 x n
+    return s
+
+
+def softmax(input):
+
 
 
 def LR(x):
@@ -95,7 +117,7 @@ def Hessian_LRgradient(x):
 
 def loss_function(x, y, theta):
     y_1 = 1. / (1. + np.exp(-x.dot(theta)))
-    return - np.sum(y * np.log(y_1) + (1 - y) * np.log(1 - y_1)) / len(y)
+    return - np.sum(y * np.log(y_1) + (1 - y) * np.log(1 - y_1)) / y.shape[0]
 
 
 def get_blocks(x, partition = 3):
@@ -116,25 +138,3 @@ def display_performance(gaps, title, performance):
     plt.title(title)
     plt.grid()
     plt.show()
-
-# This is wrong implementation, forget it.
-# def FrankWolfe(learning_rate, x, y, max_iter=200, tolerance=1e-6):
-#     #point = np.random.randn(x.shape[1], 1) * 0.001
-#     point = np.zeros((x.shape[1], 1))
-#     gaps = []
-#     current_WX = np.dot(y, x)
-#     for t in range(max_iter):
-#         x_a = np.squeeze(np.dot(x, point))
-#         gradient = np.dot(x.T, x_a) - current_WX
-#         max_index = np.argmax(np.abs(gradient))
-#         g_t1 = np.squeeze(np.dot(point.T, gradient))
-#         g_t2 =gradient[max_index] * np.sign(-gradient[max_index]) * learning_rate
-#         g_t = g_t1 - g_t2
-#         gaps.append(g_t)
-#         if g_t < tolerance:
-#             break
-#         Ldt2 = x[:, max_index] * np.sign(-gradient[max_index]) * learning_rate - x_a
-#         stride = min(np.dot(Ldt2, y - x_a) / np.dot(Ldt2,Ldt2), 1.)
-#         point = (1. - stride) * point
-#         point[max_index] = point[max_index] + stride * np.sign(-gradient[max_index]) * learning_rate
-#     return point, gaps

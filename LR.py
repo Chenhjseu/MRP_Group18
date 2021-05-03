@@ -66,7 +66,7 @@ class LogisticR:
         x, y = self.load_data()
         point, gaps, losses = FrankW.FW_BD(x, y)
         FrankW.display_performance(gaps, "FW_BD", "FW_GAPS")
-        #FrankW.display_performance(losses, "FW_BD", "FW_Losses")
+        FrankW.display_performance(losses, "FW_BD", "FW_Losses")
 
     def LRGD(self, x, y, maxIteration, learning_rate = 0.1):
         n = np.shape(x)[0]
