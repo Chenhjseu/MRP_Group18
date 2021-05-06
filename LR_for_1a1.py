@@ -35,11 +35,12 @@ class LogisticR:
         with open(self.datapath) as f:
             lines = f.readlines()
         for line in lines:
+            line = line.strip()
             #temp_line = re.split('\s\d+:', line)
             temp_line = list(filter(None, re.split('\s(\d+):\d+', line)))
             #temp_line = re.split(':+\d', line)
-            #List_X = list(map(int, temp_line[self.dimension_S:self.dimension_E]))
-            List_X = list(temp_line[self.dimension_S:self.dimension_E])
+            List_X = list(map(int, temp_line[self.dimension_S:self.dimension_E]))
+            #List_X = list(temp_line[self.dimension_S:self.dimension_E])
             if len(List_X) == 14:
                 #y.append(int(temp_line[0]) - 1)
                 #x.append(List_X)
@@ -96,7 +97,7 @@ class LogisticR:
 
 if __name__ == '__main__':
     # if you need change the file path, edit here
-    LogR = LogisticR('a_a/a1a.txt')
+    LogR = LogisticR('a1a')
 
     # you can remove the anotation to run
 
