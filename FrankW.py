@@ -96,9 +96,6 @@ def linear_oracle(grad, r = 1):
     return s
 
 
-def softmax(input):
-
-
 
 def LR(x):
     return 1.0 / (1.0 + np.exp(-x))
