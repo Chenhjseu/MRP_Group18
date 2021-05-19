@@ -106,12 +106,9 @@ if __name__ == '__main__':
     #test = LogR.process_gtd()
 
     #Block with FW
-<<<<<<< HEAD
     #test2 = LogR.process_BDfwcs()
-=======
     test2 = LogR.process_BDfwcs()
     
     end_time = datetime.now()
 
     print('Duration: {}'.format(end_time - start_time))
->>>>>>> f0dc4aecb63064bafefb4ddabc84bfe13c8ce81f
