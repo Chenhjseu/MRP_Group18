@@ -3,6 +3,10 @@ from scipy.optimize import fmin_tnc
 from sklearn.linear_model import LogisticRegression
 import re
 import FrankW
+from datagen import data_generator
+from sklearn.cluster import Kmeans
+from yellowbrick.cluster import KElbowVisualizer
+from datatime import datatime
 
 class LogisticR:
     def __init__(self, data_path):
