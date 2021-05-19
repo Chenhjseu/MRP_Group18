@@ -14,7 +14,7 @@ def data_generator(m, N):
 
     ### Generating the classes
     y = []
-    values = [1, -1]
+    values = [1, 0]
 
     for i in range(m):
         y.append(random.choice(values))
@@ -25,22 +25,22 @@ def data_generator(m, N):
    #     for item in combined:
    #         file.write('%s\n' % item)
 
-    with open('datagen.txt', 'w') as file:
-        for item in combined:
-            s = " ".join(map(str, item))
-            file.write(s + '\n')
+    # with open('datagen.txt', 'w') as file:
+    #     for item in combined:
+    #         s = " ".join(map(str, item))
+    #         file.write(s + '\n')
 
-    return combined
+    return np.array(x), np.array(y)
 
 ### To validate that the eucledian norm equals to 1
 #euclideanNorm = x.T.dot(x)
 #euclideanNorm
 
-start_time = datetime.now()
-
-### Specify number of datapoints and features
-data_generator(1000, 3000)
-
-end_time = datetime.now()
-
-print('Duration: {}'.format(end_time - start_time))
+# start_time = datetime.now()
+#
+# ### Specify number of datapoints and features
+# data_generator(1000, 3000)
+#
+# end_time = datetime.now()
+#
+# print('Duration: {}'.format(end_time - start_time))

@@ -14,9 +14,9 @@ def FW_BD(x, y, point = None, max_iter=200, tolerance=1e-100, partition = 3):
     gaps = []
     loses = []
     for t in range(max_iter):
-        gap, vk = FWSC_state(x, y, point)
+        gap, vk, loss, Hssian = FWSC_state_logloss(x, y, point)
         gaps.append(gap)
-        loses.append(loss_function(x, y, point))
+        loses.append(loss)
         if abs(gap) < tolerance:
             break
         random_index = random.randint(0, len(blocks_index)-1)
@@ -45,27 +45,28 @@ def FW_BD(x, y, point = None, max_iter=200, tolerance=1e-100, partition = 3):
 #
 #     return point, gaps, loses
 
+
 #adaptive FrankWofle for self - concordant
-def FrankWolfewithSC(x, y, point = None, max_iter=200, tolerance=1e-100):
+def FrankWolfewithSC(x, y, point = None, max_iter=1000, tolerance=1e-100):
     M = 2  ##to be determined
     if point is None:
-        point = np.random.randn(x.shape[1], 1) * 1
+        point = np.random.randn(x.shape[1], 1) * 10
         #point = np.array([[233., 1924., 182., -1191., -575., 643., 205., 385., 1028., 199.]]).T
     gaps = []
     loses = []
     for t in range(max_iter):
-        gap, vk = FWSC_state(x, y,point)
+        gap, vk, loss, Hssian = FWSC_state_logloss(x, y,point)
         gaps.append(gap)
-        loses.append(loss_function(x, y, point))
+        loses.append(loss)
         if abs(gap) < tolerance:
             break
-        Hssian = Hessian_LRgradient(x)
+
+        #Hssian = Hessian_LRgradient(x)
         e = M/2 * np.square(np.dot(np.dot(Hssian, point).T, point))
         tk = gap / (e * (gap + (4 * e)/(M ** M)))
-        ak = min(1, tk)
-        point = point - ak * vk
+        ak = min(1, float(tk))
+        point = point + ak * vk
     return point, gaps, loses
-
 
 
 def split_blocks(partition, shape):
@@ -79,14 +80,26 @@ def split_blocks(partition, shape):
     return split_index
 
 
-def FWSC_state(x,y, theta):
-    gradient = gradient_entropyloss(theta, x, y)
+# def FWSC_state(x,y, theta):
+#     gradient = gradient_entropyloss(theta, x, y)
+#     s = linear_oracle(gradient)
+#     GAP = np.dot(gradient.T, theta - s)
+#     if GAP< 0:
+#         print("error GAP")
+#     squeeze_gap = np.squeeze(GAP)
+#     return float(squeeze_gap), s-theta
 
+
+def FWSC_state_logloss(x,y, theta):
+    loss, exp_p = log_loss(x,y,theta)
+    gradient = gradient_logloss(x,y,theta,exp_p)
     s = linear_oracle(gradient)
     GAP = np.dot(gradient.T, theta - s)
     if GAP< 0:
         print("error GAP")
-    return np.squeeze(GAP), theta - s
+    squeeze_gap = np.squeeze(GAP)
+    Hssian = hess_logloss(x, exp_p, y)
+    return float(squeeze_gap), s-theta, loss, Hssian
 
 
 def linear_oracle(grad, r = 1):
@@ -116,6 +129,30 @@ def loss_function(x, y, theta):
     y_1 = 1. / (1. + np.exp(-x.dot(theta)))
     return - np.sum(y * np.log(y_1) + (1 - y) * np.log(1 - y_1)) / y.shape[0]
 
+
+def log_loss(x, y, theta, gamma = 1e-4):
+    """
+           theta -- N x n
+           y -- N x 1
+           x -- 1 x n
+    """
+    exp_p = np.exp(-y * (x.dot(theta)))
+    log_loss = np.sum(np.log(1 + exp_p))/x.shape[0] + gamma/2 * np.linalg.norm(theta,2)**2
+    return log_loss, exp_p
+
+
+def gradient_logloss(x, y, theta, exp_product, gamma = 1e-4):
+    p1 = -y * exp_product / (exp_product + 1)
+    KK = x.T @ p1
+    gradient = KK + gamma * theta
+    return gradient
+
+
+def hess_logloss(x, exp_p, y, gamma = 1e-4):
+    p1 = -y * exp_p / (exp_p + 1)
+    g1 = x.T @ p1
+    hess = g1.T @ g1 /x.shape[0] + gamma * np.eye(x.shape[1])
+    return hess
 
 def get_blocks(x, partition = 3):
     blocks_i = split_blocks(partition, (x.shape[1], 1))
