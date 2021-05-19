@@ -5,6 +5,7 @@ import re
 import FrankW
 from sklearn.cluster import KMeans
 from yellowbrick.cluster import KElbowVisualizer
+from datetime import datetime
 
 class LogisticR:
     def __init__(self, data_path):
@@ -98,6 +99,9 @@ class LogisticR:
 
 
 if __name__ == '__main__':
+    
+    start_time = datetime.now()
+    
     # if you need change the file path, edit here
     LogR = LogisticR('covtype_bin')
 
@@ -111,3 +115,7 @@ if __name__ == '__main__':
 
     #Block with FW
     test2 = LogR.process_BDfwcs()
+    
+    end_time = datetime.now()
+
+    print('Duration: {}'.format(end_time - start_time))
