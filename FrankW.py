@@ -1,12 +1,14 @@
 import numpy as np
 import pylab as plt
 import random
+import scipy.linalg as sc
 
 
 # block decent - for Frank wolfre
 def FW_BD(x, y, point = None, max_iter=200, tolerance=1e-100, partition = 3):
+    # x is training data, point is viarable that we update
     if point is None:
-        point = np.random.randn(x.shape[1], 1) * 1
+        point = np.random.randn(x.shape[1], 1) * 0.0001
         #point = np.array([233., 1924., 182., -1191., -575., 643., 205., 385., 1028., 199.]).T
     point = point.reshape(x.shape[1], 1)
     blocks_index = get_blocks(x,partition = partition)
@@ -46,11 +48,11 @@ def FW_BD(x, y, point = None, max_iter=200, tolerance=1e-100, partition = 3):
 #     return point, gaps, loses
 
 
-#adaptive FrankWofle for self - concordant
 def FrankWolfewithSC(x, y, point = None, max_iter=1000, tolerance=1e-100):
     M = 2  ##to be determined
     if point is None:
-        point = np.random.randn(x.shape[1], 1) * 10
+        #target_vector
+        point = np.random.randn(x.shape[1], 1) * 0.0001
         #point = np.array([[233., 1924., 182., -1191., -575., 643., 205., 385., 1028., 199.]]).T
     gaps = []
     loses = []
@@ -61,8 +63,9 @@ def FrankWolfewithSC(x, y, point = None, max_iter=1000, tolerance=1e-100):
         if abs(gap) < tolerance:
             break
         #Hssian = Hessian_LRgradient(x)
-        e = M/2 * np.square(np.dot(np.dot(Hssian, point).T, point))
-        tk = gap / (e * (gap + (4 * e)/(M ** M)))
+        e = M/2 * np.square(Hssian)
+        # tk = gap / (e * (gap + (4 * e)/(M ** M)))
+        tk = gap / (gap * M * e /2 + e ** 2)
         ak = min(1, float(tk))
         point = point + ak * vk
     return point, gaps, loses
@@ -97,17 +100,15 @@ def FWSC_state_logloss(x,y, theta):
     if GAP< 0:
         print("error GAP")
     squeeze_gap = np.squeeze(GAP)
-    Hssian = hess_logloss(x, exp_p, y)
+    Hssian = hess_logloss(x, exp_p, y, s - theta)
     return float(squeeze_gap), s-theta, loss, Hssian
 
 
-def linear_oracle(grad, r = 1):
-    s = np.zeros(grad.shape)
+def linear_oracle(grad, coe = 0.05):
+    s = np.zeros(grad.shape[0])
     i_max = np.argmax(np.abs(grad))
-    s[i_max] = -r * np.sign(grad[i_max]) # 1 x n
-    return s
-
-
+    s[i_max] = -(grad.shape[0] * coe)*np.sign(grad [i_max])
+    return s.reshape(grad.shape)
 
 def LR(x):
     return 1.0 / (1.0 + np.exp(-x))
@@ -130,11 +131,6 @@ def loss_function(x, y, theta):
 
 
 def log_loss(x, y, theta, gamma = 1e-4):
-    """
-           theta -- N x n
-           y -- N x 1
-           x -- 1 x n
-    """
     exp_p = np.exp(-y * (x.dot(theta)))
     log_loss = np.sum(np.log(1 + exp_p))/x.shape[0] + gamma/2 * np.linalg.norm(theta,2)**2
     return log_loss, exp_p
@@ -143,14 +139,14 @@ def log_loss(x, y, theta, gamma = 1e-4):
 def gradient_logloss(x, y, theta, exp_product, gamma = 1e-4):
     p1 = -y * exp_product / (exp_product + 1)
     KK = x.T @ p1
-    gradient = KK + gamma * theta
+    gradient = KK/x.shape[0] + gamma * theta
     return gradient
 
 
-def hess_logloss(x, exp_p, y, gamma = 1e-4):
-    p1 = -y * exp_p / (exp_p + 1)
-    g1 = x.T @ p1
-    hess = g1.T @ g1 /x.shape[0] + gamma * np.eye(x.shape[1])
+def hess_logloss(x, exp_p, y, s , gamma = 1e-4):
+    p1 = y * exp_p / (exp_p + 1)
+    g1 = x @ s
+    hess = (g1.T@p1)**2 /x.shape[0] + gamma*np.linalg.norm(s,2)**2
     return hess
 
 def get_blocks(x, partition = 3):
