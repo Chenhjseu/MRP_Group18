@@ -3,7 +3,13 @@ from scipy.optimize import fmin_tnc
 from sklearn.linear_model import LogisticRegression
 import re
 import FrankW
+<<<<<<< HEAD
 from datagen import data_generator
+=======
+from sklearn.cluster import KMeans
+from yellowbrick.cluster import KElbowVisualizer
+from datetime import datetime
+>>>>>>> f0dc4aecb63064bafefb4ddabc84bfe13c8ce81f
 
 class LogisticR:
     def __init__(self, data_path):
@@ -92,6 +98,9 @@ class LogisticR:
 
 
 if __name__ == '__main__':
+    
+    start_time = datetime.now()
+    
     # if you need change the file path, edit here
     LogR = LogisticR('covtype_bin')
 
@@ -104,4 +113,12 @@ if __name__ == '__main__':
     #test = LogR.process_gtd()
 
     #Block with FW
+<<<<<<< HEAD
     #test2 = LogR.process_BDfwcs()
+=======
+    test2 = LogR.process_BDfwcs()
+    
+    end_time = datetime.now()
+
+    print('Duration: {}'.format(end_time - start_time))
+>>>>>>> f0dc4aecb63064bafefb4ddabc84bfe13c8ce81f

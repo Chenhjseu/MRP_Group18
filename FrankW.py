@@ -60,7 +60,6 @@ def FrankWolfewithSC(x, y, point = None, max_iter=1000, tolerance=1e-100):
         loses.append(loss)
         if abs(gap) < tolerance:
             break
-
         #Hssian = Hessian_LRgradient(x)
         e = M/2 * np.square(np.dot(np.dot(Hssian, point).T, point))
         tk = gap / (e * (gap + (4 * e)/(M ** M)))
