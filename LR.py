@@ -61,14 +61,18 @@ class LogisticR:
     #     FrankW.display_performance(gaps, "FW", "FW_Losses")
 
     def process_fwcs(self):
+        # To run the code on one of the existing datasets(e.g. covtype_bin)
         #x, y = self.load_data()
+        # To run the code by generating the data according to datagen.py
         x, y = self.generate_data()
         point, gaps, losses = FrankW.FrankWolfewithSC(x, y)
         FrankW.display_performance(gaps, "FW_SC", "GAPS")
         FrankW.display_performance(losses, "FW_SC", "Losses")
 
     def process_BDfwcs(self):
+        # To run the code on one of the existing datasets(e.g. covtype_bin)
         #x, y = self.load_data()
+        # To run the code by generating the data according to datagen.py
         x, y = self.generate_data()
         point, gaps, losses = FrankW.FW_BD(x, y)
         FrankW.display_performance(gaps, "FW_BD", "FWBD_GAPS")
