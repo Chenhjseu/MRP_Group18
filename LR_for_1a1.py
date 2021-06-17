@@ -29,27 +29,10 @@ class LogisticR:
         return (1 / size) * np.dot(x.T, self.kernel(np.dot(x, theta)) - y)
 
     def load_data(self):
-        x = []
-        y = []
-        
-        with open(self.datapath) as f:
-            lines = f.readlines()
-        for line in lines:
-            line = line.strip()
-            #temp_line = re.split('\s\d+:', line)
-            temp_line = list(filter(None, re.split('\s(\d+):\d+', line)))
-            #temp_line = re.split(':+\d', line)
-            List_X = list(map(int, temp_line[self.dimension_S:self.dimension_E]))
-            #List_X = list(temp_line[self.dimension_S:self.dimension_E])
-            if len(List_X) == 14:
-                #y.append(int(temp_line[0]) - 1)
-                #x.append(List_X)
-                x.append(List_X)
-
-                if int(temp_line[0]) == -1:
-                    y.append(int(temp_line[0]) + 1)
-                else:
-                    y.append(int(temp_line[0]))
+        from sklearn.datasets import load_svmlight_file
+        x, y = load_svmlight_file('a1a')
+        x = x.todense()
+        return np.array(x), np.array(y).reshape(len(y), 1)
 
         return np.array(x), np.array(y).reshape(len(y), 1)
 
