@@ -33,9 +33,6 @@ class LogisticR:
         x, y = load_svmlight_file('a1a')
         x = x.todense()
         return np.array(x), np.array(y).reshape(len(y), 1)
-
-        return np.array(x), np.array(y).reshape(len(y), 1)
-
     #def process_gtd(self):
     #    x, y = self.load_data()
     #    self.parameters['theta'] = np.random.randn(x.shape[1], 1) * 0.1
